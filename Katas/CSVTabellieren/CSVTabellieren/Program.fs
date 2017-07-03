@@ -21,29 +21,33 @@ module CSVFormater =
 
     let tabulate (lines : seq<array<string>>) (columnsWidth : array<int>) =
 
-        let rightPaddedContent = 
-            lines
-            |> Seq.map (Seq.zip columnsWidth)
-            |> Seq.map (Seq.map (fun x -> 
-                                     let totalWidth,text = x 
-                                     text.PadRight(totalWidth) + "|") )
-        let header = 
-            Seq.take 1 rightPaddedContent
-            |> Seq.concat |> String.concat ""
+        let padRightTable =
+            let padRightLine line =                          
+                let padRight totalWidth (text: string) = 
+                    text.PadRight totalWidth + "|"
+                Seq.map2 padRight columnsWidth line                
+            Seq.map padRightLine lines
 
-        let separator = 
+        let createLine =
+            String.concat ""
+
+        let tableHeader = 
+            Seq.head padRightTable
+
+        let tableBody =
+            Seq.tail padRightTable          
+
+        let separator =             
             columnsWidth 
-            |> Array.map (fun x -> sprintf "%s+" (String.replicate x "-"))
-            |> String.concat "" 
-
-        let lines =
-            Seq.skip 1 rightPaddedContent
-            |> Seq.map (fun x -> Seq.append x [Environment.NewLine])
-            |> Seq.concat |> String.concat ""
-        
-        String.concat Environment.NewLine [header
-                                           separator
-                                           lines]
+            |> Seq.map (fun width -> sprintf "%s+" (String.replicate width "-"))
+                    
+        seq {
+            yield tableHeader
+            yield separator
+            yield! tableBody
+        }
+        |> Seq.map createLine
+        |> String.concat Environment.NewLine
                       
 [<EntryPoint>]
 let main argv = 
