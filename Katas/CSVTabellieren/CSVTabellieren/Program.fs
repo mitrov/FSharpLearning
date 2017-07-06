@@ -31,24 +31,27 @@ module CSVFormater =
         let createLine =
             String.concat ""
 
+        let separator = 
+            columnsWidth
+            |> Seq.map(fun width -> sprintf "%s%s" (String.replicate width "-") "|")
+
         let tableHeader = 
             Seq.head padRightTable
 
         let tableBody =
-            Seq.tail padRightTable          
-
-        let separator =             
-            columnsWidth 
-            |> Seq.map (fun width -> sprintf "%s+" (String.replicate width "-"))
-                    
+            Seq.tail padRightTable
+            |> Seq.take 10
+                                    
         seq {
             yield tableHeader
             yield separator
             yield! tableBody
         }
+
         |> Seq.map createLine
         |> String.concat Environment.NewLine
-                      
+  
+                    
 [<EntryPoint>]
 let main argv = 
     let inputString = File.ReadAllText("..\..\Fielding.csv")
