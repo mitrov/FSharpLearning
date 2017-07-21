@@ -18,8 +18,15 @@ let rec allFilesUnder basePath  =
         yield! allFilesUnder subdir
     }
 
+let allFilesUnder' basePath  =
+    let rec accAllFilesUnder basePath acc = 
+        getFiles basePath
+        for subdir in getDirectories basePath do
+            accAllFilesUnder (subdir) (Seq.append )
+    accAllFilesUnder basePath Seq.singleton
+
 [<EntryPoint>]
 let main argv = 
-    allFilesUnder @"C:\"
+    allFilesUnder' @"C:\FsEye"
     |> Seq.iter(printfn "%s")
     0 // return an integer exit code
